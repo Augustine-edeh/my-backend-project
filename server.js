@@ -1,4 +1,6 @@
 const express = require("express");
+const db = require("better-sqlite3")("myApp.db");
+db.pragma("journal_mode = WAL");
 const app = express();
 
 app.set("view engine", "ejs");
