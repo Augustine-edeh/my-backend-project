@@ -39,6 +39,7 @@ app.get("/login", (req, res) => {
   res.render("login");
 });
 
+// Register route (for user Signup)
 app.post("/register", (req, res) => {
   const errors = [];
 
@@ -66,8 +67,14 @@ app.post("/register", (req, res) => {
   }
 
   // Save the new user into a database
+  const myStatement = db.prepare(
+    "INSERT INTO users (username, password) VALUES (?, ?)"
+  );
+
+  myStatement.run(req.body.username, req.body.password);
 
   // Log thr user in by giving them a cookie
+  res.send("Thank you!");
 });
 
 app.listen(3000);
