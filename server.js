@@ -1,5 +1,6 @@
 const bcrypt = require("bcrypt");
 const express = require("express");
+const { cookie } = require("express/lib/response");
 const db = require("better-sqlite3")("myApp.db");
 db.pragma("journal_mode = WAL");
 
@@ -77,7 +78,14 @@ app.post("/register", (req, res) => {
 
   myStatement.run(req.body.username, req.body.password);
 
-  // Log thr user in by giving them a cookie
+  // Log the user in by giving them a cookie
+  res.cookie("mySimpleApp", "supertopsecretvalue", {
+    httpOnlyt: true,
+    secure: true,
+    sameSite: "strict",
+    maxAge: 1000 * 60 * 60 * 24, // cookie is valid for 1 day (24 hours)
+  });
+
   res.send("Thank you!");
 });
 
