@@ -1,5 +1,8 @@
+require("dotenv").config();
+const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const express = require("express");
+// TODO: double check the need for this FIXME:
 const { cookie } = require("express/lib/response");
 const db = require("better-sqlite3")("myApp.db");
 db.pragma("journal_mode = WAL");
@@ -26,6 +29,7 @@ app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static("public"));
 
+// Middleware
 app.use(function (req, res, next) {
   res.locals.errors = [];
   next();
@@ -76,10 +80,23 @@ app.post("/register", (req, res) => {
     "INSERT INTO users (username, password) VALUES (?, ?)"
   );
 
-  myStatement.run(req.body.username, req.body.password);
+  const result = myStatement.run(req.body.username, req.body.password);
+
+  const lookupStatement = db.prepare("SELECT * FROM users WHERE ROWID = ?");
+  const myUser = lookupStatement.get(result.lastInsertRowid);
 
   // Log the user in by giving them a cookie
-  res.cookie("mySimpleApp", "supertopsecretvalue", {
+  const myTokenValue = jwt.sign(
+    {
+      exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24,
+      skyColor: "blue",
+      userid: myUser.id,
+      username: myUser.username,
+    },
+    process.env.JWTSECRET
+  );
+
+  res.cookie("mySimpleApp", myTokenValue, {
     httpOnlyt: true,
     secure: true,
     sameSite: "strict",
