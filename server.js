@@ -1,6 +1,7 @@
 require("dotenv").config();
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
+const cookieParser = require("cookie-parser");
 const express = require("express");
 // TODO: double check the need for this FIXME:
 const { cookie } = require("express/lib/response");
@@ -28,10 +29,23 @@ const app = express();
 app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static("public"));
+app.use(cookieParser());
 
 // Middleware
 app.use(function (req, res, next) {
   res.locals.errors = [];
+
+  // try to decode incoming cookie
+  try {
+    const decoded = jwt.verify(req.cookies.mySimpleApp, process.env.JWTSECRET);
+    req.user = decoded;
+  } catch (error) {
+    req.user = false;
+  }
+
+  res.locals.user = req.user;
+  console.log(req.user);
+
   next();
 });
 
