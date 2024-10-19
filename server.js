@@ -62,6 +62,11 @@ app.get("/", (req, res) => {
 app.get("/login", (req, res) => {
   res.render("login");
 });
+// Logout route
+app.get("/logout", (req, res) => {
+  res.clearCookie("mySimpleApp");
+  res.redirect("/");
+});
 
 // Register route (for user Signup)
 app.post("/register", (req, res) => {
